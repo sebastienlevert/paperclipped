@@ -9,6 +9,7 @@ import { shareFile, openInOfficeApp, openOnWeb, openFolderOnWeb, openVersionHist
 import { OfficePreviewProvider } from "./preview";
 import { SyncStatusDecorationProvider } from "./sync-decorations";
 import { showRecentFiles } from "./recent-files";
+import { exportToWord } from "./export-word";
 
 export function activate(context: vscode.ExtensionContext): void {
   if (process.platform !== "win32") {
@@ -152,6 +153,16 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
         await copySharingLink(filePath);
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.exportToWord",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (filePath) {
+          await exportToWord(filePath);
+        }
       }
     )
   );

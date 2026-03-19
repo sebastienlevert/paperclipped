@@ -97,6 +97,11 @@
         "command": "paperclipped.copySharingLink",
         "title": "Copy Sharing Link",
         "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.exportToWord",
+        "title": "Export to Word",
+        "category": "Paperclipped"
       }
     ],
     "submenus": [
@@ -160,6 +165,11 @@
         {
           "command": "paperclipped.versionHistory",
           "group": "4_history"
+        },
+        {
+          "command": "paperclipped.exportToWord",
+          "when": "resourceExtname == .md",
+          "group": "5_export"
         }
       ],
       "commandPalette": [
@@ -198,6 +208,10 @@
         {
           "command": "paperclipped.copySharingLink",
           "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.exportToWord",
+          "when": "resourceExtname =~ /^\\.md$/i"
         }
       ]
     },
