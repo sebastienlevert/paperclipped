@@ -233,13 +233,21 @@ export async function copyWebLink(filePath: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * Open the parent folder of a OneDrive-synced file in the browser.
+ * Open the containing folder of a OneDrive-synced file (or the folder itself) in the browser.
  */
 export async function openFolderOnWeb(filePath: string): Promise<void> {
-  const dirPath = path.dirname(filePath);
+  // If the path is a directory, use it directly; otherwise use its parent
+  let dirPath: string;
+  try {
+    const stat = require("fs").statSync(filePath);
+    dirPath = stat.isDirectory() ? filePath : path.dirname(filePath);
+  } catch {
+    dirPath = path.dirname(filePath);
+  }
+
   const account = findOneDriveRoot(dirPath);
   if (!account) {
-    vscode.window.showErrorMessage("This file is not in a OneDrive folder.");
+    vscode.window.showErrorMessage("This path is not in a OneDrive folder.");
     return;
   }
   if (!account.webEndpoint) {
