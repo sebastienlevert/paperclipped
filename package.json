@@ -79,11 +79,6 @@
         }
       },
       {
-        "command": "paperclipped.copyLink",
-        "title": "Copy Link",
-        "category": "Paperclipped"
-      },
-      {
         "command": "paperclipped.openFolderOnWeb",
         "title": "Open Folder on Web",
         "category": "Paperclipped"
@@ -145,10 +140,6 @@
           "group": "3_web"
         },
         {
-          "command": "paperclipped.copyLink",
-          "group": "3_web"
-        },
-        {
           "command": "paperclipped.openFolderOnWeb",
           "group": "3_web"
         },
@@ -176,10 +167,6 @@
         },
         {
           "command": "paperclipped.openOnWeb",
-          "when": "paperclipped:isOneDriveWorkspace"
-        },
-        {
-          "command": "paperclipped.copyLink",
           "when": "paperclipped:isOneDriveWorkspace"
         },
         {

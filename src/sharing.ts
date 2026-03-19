@@ -213,21 +213,6 @@ export async function openOnWeb(filePath: string): Promise<void> {
 // Copy Web Link
 // ---------------------------------------------------------------------------
 
-/**
- * Copy the web URL for a OneDrive-synced file to the clipboard.
- */
-export async function copyWebLink(filePath: string): Promise<void> {
-  const webUrl = await resolveWebUrl(filePath);
-  if (webUrl) {
-    await vscode.env.clipboard.writeText(webUrl);
-    vscode.window.showInformationMessage("Link copied to clipboard.");
-  } else {
-    vscode.window.showWarningMessage(
-      "Could not determine the web URL for this file. Make sure OneDrive is syncing this folder."
-    );
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Open Folder on Web
 // ---------------------------------------------------------------------------
