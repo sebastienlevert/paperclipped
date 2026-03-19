@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="paperclip.png" alt="Paperclip" width="128" />
+  <img src="https://raw.githubusercontent.com/sebastienlevert/vscode-paperclip/main/paperclip.png" alt="Paperclip" width="128" />
 </p>
 
 # Paperclip
