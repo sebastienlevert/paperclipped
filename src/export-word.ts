@@ -14,6 +14,22 @@ async function isMarkMyWordInstalled(): Promise<boolean> {
 }
 
 /**
+ * Install the MarkMyWord CLI as a .NET global tool.
+ */
+async function installMarkMyWord(): Promise<boolean> {
+  return new Promise((resolve) => {
+    execFile(
+      "dotnet",
+      ["tool", "install", "-g", "specworks.markmyword.cli"],
+      { timeout: 60000 },
+      (err) => {
+        resolve(!err);
+      }
+    );
+  });
+}
+
+/**
  * Convert a markdown file to Word (.docx) using the MarkMyWord CLI.
  */
 async function convertToWord(
@@ -49,25 +65,43 @@ export async function exportToWord(filePath: string): Promise<void> {
     return;
   }
 
-  // Check if MarkMyWord is installed
-  const installed = await isMarkMyWordInstalled();
+  // Check if MarkMyWord is installed — auto-install if needed
+  let installed = await isMarkMyWordInstalled();
   if (!installed) {
-    const install = await vscode.window.showWarningMessage(
-      "MarkMyWord CLI is required for Markdown → Word conversion. Install it?",
+    const install = await vscode.window.showInformationMessage(
+      "MarkMyWord CLI is required for Markdown → Word conversion. Install it now?",
       "Install",
       "Cancel"
     );
-    if (install === "Install") {
-      const terminal = vscode.window.createTerminal("Install MarkMyWord");
-      terminal.show();
-      terminal.sendText(
-        "dotnet tool install -g specworks.markmyword.cli"
-      );
-      vscode.window.showInformationMessage(
-        "Installing MarkMyWord. Run the export again after installation completes."
-      );
+    if (install !== "Install") {
+      return;
     }
-    return;
+
+    const success = await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Installing MarkMyWord CLI...",
+        cancellable: false,
+      },
+      async () => {
+        return installMarkMyWord();
+      }
+    );
+
+    if (!success) {
+      vscode.window.showErrorMessage(
+        "Failed to install MarkMyWord. Make sure the .NET SDK is installed and try: dotnet tool install -g specworks.markmyword.cli"
+      );
+      return;
+    }
+
+    installed = await isMarkMyWordInstalled();
+    if (!installed) {
+      vscode.window.showErrorMessage(
+        "MarkMyWord installed but not found in PATH. You may need to restart VS Code."
+      );
+      return;
+    }
   }
 
   // Build output path
