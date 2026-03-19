@@ -10,6 +10,27 @@ import {
 } from "./onedrive";
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve the web URL for a OneDrive-synced file.
+ * Enriches the account's web endpoint from the registry if needed.
+ */
+export async function resolveWebUrl(
+  filePath: string
+): Promise<string | undefined> {
+  const account = findOneDriveRoot(filePath);
+  if (!account) {
+    return undefined;
+  }
+  if (!account.webEndpoint) {
+    await enrichAccountsFromRegistry(discoverOneDriveRoots());
+  }
+  return buildWebUrl(filePath, account);
+}
+
+// ---------------------------------------------------------------------------
 // Share
 // ---------------------------------------------------------------------------
 
@@ -141,12 +162,7 @@ export async function openOnWeb(filePath: string): Promise<void> {
     return;
   }
 
-  // Ensure we have the web endpoint
-  if (!account.webEndpoint) {
-    await enrichAccountsFromRegistry(discoverOneDriveRoots());
-  }
-
-  const webUrl = buildWebUrl(filePath, account);
+  const webUrl = await resolveWebUrl(filePath);
   if (webUrl) {
     await vscode.env.openExternal(vscode.Uri.parse(webUrl));
     return;
@@ -189,6 +205,75 @@ export async function openOnWeb(filePath: string): Promise<void> {
   } catch (err: any) {
     vscode.window.showErrorMessage(
       `Failed to open on web: ${err.message}`
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Copy Web Link
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy the web URL for a OneDrive-synced file to the clipboard.
+ */
+export async function copyWebLink(filePath: string): Promise<void> {
+  const webUrl = await resolveWebUrl(filePath);
+  if (webUrl) {
+    await vscode.env.clipboard.writeText(webUrl);
+    vscode.window.showInformationMessage("Link copied to clipboard.");
+  } else {
+    vscode.window.showWarningMessage(
+      "Could not determine the web URL for this file. Make sure OneDrive is syncing this folder."
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Open Folder on Web
+// ---------------------------------------------------------------------------
+
+/**
+ * Open the parent folder of a OneDrive-synced file in the browser.
+ */
+export async function openFolderOnWeb(filePath: string): Promise<void> {
+  const dirPath = path.dirname(filePath);
+  const account = findOneDriveRoot(dirPath);
+  if (!account) {
+    vscode.window.showErrorMessage("This file is not in a OneDrive folder.");
+    return;
+  }
+  if (!account.webEndpoint) {
+    await enrichAccountsFromRegistry(discoverOneDriveRoots());
+  }
+
+  const folderUrl = buildWebUrl(dirPath, account);
+  if (folderUrl) {
+    // Remove ?web=1 for folders — use the folder URL directly
+    const url = folderUrl.replace(/\?web=1$/, "");
+    await vscode.env.openExternal(vscode.Uri.parse(url));
+  } else {
+    vscode.window.showWarningMessage(
+      "Could not determine the web URL for this folder."
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Version History
+// ---------------------------------------------------------------------------
+
+/**
+ * Open the version history page for a OneDrive-synced file in the browser.
+ */
+export async function openVersionHistory(filePath: string): Promise<void> {
+  const webUrl = await resolveWebUrl(filePath);
+  if (webUrl) {
+    // Replace ?web=1 with the version history action URL
+    const historyUrl = webUrl.replace(/\?web=1$/, "?action=versionhistory");
+    await vscode.env.openExternal(vscode.Uri.parse(historyUrl));
+  } else {
+    vscode.window.showWarningMessage(
+      "Could not determine the web URL for this file. Make sure OneDrive is syncing this folder."
     );
   }
 }

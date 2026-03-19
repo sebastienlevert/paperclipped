@@ -77,6 +77,21 @@
           "light": "resources/icons/web.svg",
           "dark": "resources/icons/web.svg"
         }
+      },
+      {
+        "command": "paperclipped.copyLink",
+        "title": "Copy Link",
+        "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.openFolderOnWeb",
+        "title": "Open Folder on Web",
+        "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.versionHistory",
+        "title": "Version History",
+        "category": "Paperclipped"
       }
     ],
     "submenus": [
@@ -123,6 +138,18 @@
         {
           "command": "paperclipped.openOnWeb",
           "group": "3_web"
+        },
+        {
+          "command": "paperclipped.copyLink",
+          "group": "3_web"
+        },
+        {
+          "command": "paperclipped.openFolderOnWeb",
+          "group": "3_web"
+        },
+        {
+          "command": "paperclipped.versionHistory",
+          "group": "4_history"
         }
       ],
       "commandPalette": [
@@ -144,6 +171,18 @@
         },
         {
           "command": "paperclipped.openOnWeb",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.copyLink",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.openFolderOnWeb",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.versionHistory",
           "when": "paperclipped:isOneDriveWorkspace"
         }
       ]

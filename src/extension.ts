@@ -4,7 +4,7 @@ import {
   isInOneDrive,
   discoverOneDriveRoots,
 } from "./onedrive";
-import { shareFile, openInOfficeApp, openOnWeb } from "./sharing";
+import { shareFile, openInOfficeApp, openOnWeb, copyWebLink, openFolderOnWeb, openVersionHistory } from "./sharing";
 import { OfficePreviewProvider } from "./preview";
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -88,6 +88,57 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
         await openOnWeb(filePath);
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.copyLink",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (!filePath) {
+          return;
+        }
+        if (!isInOneDrive(filePath)) {
+          vscode.window.showWarningMessage(
+            "This file is not in a OneDrive folder."
+          );
+          return;
+        }
+        await copyWebLink(filePath);
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.openFolderOnWeb",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (!filePath) {
+          return;
+        }
+        if (!isInOneDrive(filePath)) {
+          vscode.window.showWarningMessage(
+            "This file is not in a OneDrive folder."
+          );
+          return;
+        }
+        await openFolderOnWeb(filePath);
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.versionHistory",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (!filePath) {
+          return;
+        }
+        if (!isInOneDrive(filePath)) {
+          vscode.window.showWarningMessage(
+            "This file is not in a OneDrive folder."
+          );
+          return;
+        }
+        await openVersionHistory(filePath);
       }
     )
   );
