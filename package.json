@@ -1,0 +1,171 @@
+{
+  "name": "vscode-paperclip",
+  "displayName": "Paperclip",
+  "description": "A better integration for VS Code and productivity documents — share files, open in Word, Excel, PowerPoint, preview Office docs, and open on the web",
+  "version": "0.1.0",
+  "publisher": "sebastienlevert",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "Paperclip",
+    "sharing",
+    "office",
+    "word",
+    "excel",
+    "powerpoint"
+  ],
+  "os": [
+    "win32"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "paperclip.share",
+        "title": "Share...",
+        "category": "Paperclip",
+        "icon": {
+          "light": "resources/icons/share.svg",
+          "dark": "resources/icons/share.svg"
+        }
+      },
+      {
+        "command": "paperclip.openInWord",
+        "title": "Open in Word",
+        "category": "Paperclip",
+        "icon": {
+          "light": "resources/icons/word.svg",
+          "dark": "resources/icons/word.svg"
+        }
+      },
+      {
+        "command": "paperclip.openInExcel",
+        "title": "Open in Excel",
+        "category": "Paperclip",
+        "icon": {
+          "light": "resources/icons/excel.svg",
+          "dark": "resources/icons/excel.svg"
+        }
+      },
+      {
+        "command": "paperclip.openInPowerPoint",
+        "title": "Open in PowerPoint",
+        "category": "Paperclip",
+        "icon": {
+          "light": "resources/icons/powerpoint.svg",
+          "dark": "resources/icons/powerpoint.svg"
+        }
+      },
+      {
+        "command": "paperclip.openOnWeb",
+        "title": "Open on Web",
+        "category": "Paperclip",
+        "icon": {
+          "light": "resources/icons/web.svg",
+          "dark": "resources/icons/web.svg"
+        }
+      }
+    ],
+    "submenus": [
+      {
+        "id": "paperclip.menu",
+        "label": "Paperclip"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "submenu": "paperclip.menu",
+          "when": "paperclip:isOneDriveWorkspace && !explorerResourceIsFolder",
+          "group": "navigation@100"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "submenu": "paperclip.menu",
+          "when": "paperclip:isOneDriveWorkspace",
+          "group": "navigation@100"
+        }
+      ],
+      "paperclip.menu": [
+        {
+          "command": "paperclip.share",
+          "group": "1_share"
+        },
+        {
+          "command": "paperclip.openInWord",
+          "when": "resourceExtname == .doc || resourceExtname == .docx || resourceExtname == .docm || resourceExtname == .dot || resourceExtname == .dotx || resourceExtname == .dotm || resourceExtname == .rtf",
+          "group": "2_openApp"
+        },
+        {
+          "command": "paperclip.openInExcel",
+          "when": "resourceExtname == .xls || resourceExtname == .xlsx || resourceExtname == .xlsm || resourceExtname == .xlsb || resourceExtname == .xlt || resourceExtname == .xltx || resourceExtname == .xltm || resourceExtname == .csv",
+          "group": "2_openApp"
+        },
+        {
+          "command": "paperclip.openInPowerPoint",
+          "when": "resourceExtname == .ppt || resourceExtname == .pptx || resourceExtname == .pptm || resourceExtname == .pot || resourceExtname == .potx || resourceExtname == .potm || resourceExtname == .ppsx || resourceExtname == .ppsm || resourceExtname == .pps",
+          "group": "2_openApp"
+        },
+        {
+          "command": "paperclip.openOnWeb",
+          "group": "3_web"
+        }
+      ]
+    },
+    "customEditors": [
+      {
+        "viewType": "paperclip.officePreview",
+        "displayName": "Office Document Preview (Paperclip)",
+        "selector": [
+          { "filenamePattern": "*.doc" },
+          { "filenamePattern": "*.docx" },
+          { "filenamePattern": "*.docm" },
+          { "filenamePattern": "*.dot" },
+          { "filenamePattern": "*.dotx" },
+          { "filenamePattern": "*.dotm" },
+          { "filenamePattern": "*.rtf" },
+          { "filenamePattern": "*.xls" },
+          { "filenamePattern": "*.xlsx" },
+          { "filenamePattern": "*.xlsm" },
+          { "filenamePattern": "*.xlsb" },
+          { "filenamePattern": "*.xlt" },
+          { "filenamePattern": "*.xltx" },
+          { "filenamePattern": "*.xltm" },
+          { "filenamePattern": "*.ppt" },
+          { "filenamePattern": "*.pptx" },
+          { "filenamePattern": "*.pptm" },
+          { "filenamePattern": "*.pot" },
+          { "filenamePattern": "*.potx" },
+          { "filenamePattern": "*.potm" },
+          { "filenamePattern": "*.ppsx" },
+          { "filenamePattern": "*.ppsm" },
+          { "filenamePattern": "*.pps" },
+          { "filenamePattern": "*.pdf" }
+        ],
+        "priority": "default"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "vscode:prepublish": "node esbuild.js --production",
+    "package": "vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "esbuild": "^0.20.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}
