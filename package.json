@@ -5,6 +5,11 @@
   "version": "0.1.0",
   "publisher": "sebastienlevert",
   "license": "MIT",
+  "icon": "paperclip.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebastienlevert/vscode-paperclip.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -126,30 +131,78 @@
         "viewType": "paperclip.officePreview",
         "displayName": "Office Document Preview (Paperclip)",
         "selector": [
-          { "filenamePattern": "*.doc" },
-          { "filenamePattern": "*.docx" },
-          { "filenamePattern": "*.docm" },
-          { "filenamePattern": "*.dot" },
-          { "filenamePattern": "*.dotx" },
-          { "filenamePattern": "*.dotm" },
-          { "filenamePattern": "*.rtf" },
-          { "filenamePattern": "*.xls" },
-          { "filenamePattern": "*.xlsx" },
-          { "filenamePattern": "*.xlsm" },
-          { "filenamePattern": "*.xlsb" },
-          { "filenamePattern": "*.xlt" },
-          { "filenamePattern": "*.xltx" },
-          { "filenamePattern": "*.xltm" },
-          { "filenamePattern": "*.ppt" },
-          { "filenamePattern": "*.pptx" },
-          { "filenamePattern": "*.pptm" },
-          { "filenamePattern": "*.pot" },
-          { "filenamePattern": "*.potx" },
-          { "filenamePattern": "*.potm" },
-          { "filenamePattern": "*.ppsx" },
-          { "filenamePattern": "*.ppsm" },
-          { "filenamePattern": "*.pps" },
-          { "filenamePattern": "*.pdf" }
+          {
+            "filenamePattern": "*.doc"
+          },
+          {
+            "filenamePattern": "*.docx"
+          },
+          {
+            "filenamePattern": "*.docm"
+          },
+          {
+            "filenamePattern": "*.dot"
+          },
+          {
+            "filenamePattern": "*.dotx"
+          },
+          {
+            "filenamePattern": "*.dotm"
+          },
+          {
+            "filenamePattern": "*.rtf"
+          },
+          {
+            "filenamePattern": "*.xls"
+          },
+          {
+            "filenamePattern": "*.xlsx"
+          },
+          {
+            "filenamePattern": "*.xlsm"
+          },
+          {
+            "filenamePattern": "*.xlsb"
+          },
+          {
+            "filenamePattern": "*.xlt"
+          },
+          {
+            "filenamePattern": "*.xltx"
+          },
+          {
+            "filenamePattern": "*.xltm"
+          },
+          {
+            "filenamePattern": "*.ppt"
+          },
+          {
+            "filenamePattern": "*.pptx"
+          },
+          {
+            "filenamePattern": "*.pptm"
+          },
+          {
+            "filenamePattern": "*.pot"
+          },
+          {
+            "filenamePattern": "*.potx"
+          },
+          {
+            "filenamePattern": "*.potm"
+          },
+          {
+            "filenamePattern": "*.ppsx"
+          },
+          {
+            "filenamePattern": "*.ppsm"
+          },
+          {
+            "filenamePattern": "*.pps"
+          },
+          {
+            "filenamePattern": "*.pdf"
+          }
         ],
         "priority": "default"
       }
@@ -158,8 +211,8 @@
   "scripts": {
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
-    "vscode:prepublish": "node esbuild.js --production",
-    "package": "vsce package --allow-missing-repository"
+    "package": "vsce package --allow-missing-repository",
+    "vscode:prepublish": "node esbuild.js --production"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

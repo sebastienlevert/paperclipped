@@ -1,6 +1,10 @@
+<p align="center">
+  <img src="paperclip.png" alt="Paperclip" width="128" />
+</p>
+
 # Paperclip
 
-A better integration for VS Code and productivity documents — share files, open on the web, open in Word, Excel, PowerPoint, and preview Office documents without leaving your editor.
+A better integration for VS Code and productivity documents— share files, open on the web, open in Word, Excel, PowerPoint, and preview Office documents without leaving your editor.
 
 > **Windows only** (for now). Requires the OneDrive sync client.
 
@@ -143,7 +147,7 @@ To revert to the default VS Code binary editor, right-click the file → **Open 
 |-------------|---------|
 | **Operating system** | Windows 10 or Windows 11 |
 | **OneDrive sync client** | Installed and signed in (personal, business, or both) |
-| **Microsoft Office** | Required for "Open in Word/Excel/PowerPoint". The extension gracefully degrades if Office is not installed — it uses the default file handler instead. |
+| **Office** | Required for "Open in Word/Excel/PowerPoint". The extension gracefully degrades if Office is not installed — it uses the default file handler instead. |
 | **VS Code** | 1.85.0 or later |
 
 ---
@@ -155,7 +159,7 @@ To revert to the default VS Code binary editor, right-click the file → **Open 
 On activation, the extension discovers OneDrive root folders using two strategies:
 
 1. **Environment variables** — `OneDriveCommercial`, `OneDriveConsumer`, `OneDrive`
-2. **Home directory scan** — Any directory in `%USERPROFILE%` starting with `OneDrive` (e.g., `OneDrive - Microsoft`, `OneDrive - Contoso`)
+2. **Home directory scan** — Any directory in `%USERPROFILE%` starting with `OneDrive` (e.g., `OneDrive - Contoso`)
 
 Business accounts are identified by the presence of ` - ` in the folder name. Results are cached for the lifetime of the VS Code window.
 
@@ -179,7 +183,7 @@ The extension reads the real Office executable path from the registry:
 HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\<exe>
 ```
 
-For example, Word resolves to `C:\Program Files\Microsoft Office\Root\Office16\WINWORD.EXE`. The file path is passed via `Start-Process -ArgumentList` with proper double-quoting to handle paths with spaces (e.g., `OneDrive - Microsoft`).
+For example, Word resolves to `C:\Program Files\Microsoft Office\Root\Office16\WINWORD.EXE`. The file path is passed via `Start-Process -ArgumentList` with proper double-quoting to handle paths with spaces (e.g., `OneDrive - Contoso`).
 
 ### Web URL resolution
 
@@ -187,7 +191,7 @@ The OneDrive sync client stores web endpoints in the registry:
 
 ```
 HKCU:\Software\Microsoft\OneDrive\Accounts\*
-  → UserFolder: C:\Users\user\OneDrive - Microsoft
+  → UserFolder: C:\Users\user\OneDrive - Contoso
   → ServiceEndpointUri: https://contoso-my.sharepoint.com/personal/user_contoso_com/
 ```
 
@@ -278,7 +282,7 @@ The extension does not currently expose user-configurable settings. Behavior is 
 
 - Verify the registry key exists: `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\WINWORD.EXE`
 - If you have multiple Office installations, the extension uses whichever is registered in `App Paths`.
-- Paths with spaces (e.g., `OneDrive - Microsoft`) are properly quoted. If you still see errors, check the VS Code Developer Console (`Help` → `Toggle Developer Tools`) for details.
+- Paths with spaces (e.g., `OneDrive - Contoso`) are properly quoted. If you still see errors, check the VS Code Developer Console (`Help` → `Toggle Developer Tools`) for details.
 
 ### "Open on Web" shows a warning about web endpoint
 
