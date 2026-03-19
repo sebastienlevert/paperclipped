@@ -306,3 +306,73 @@ export async function openVersionHistory(filePath: string): Promise<void> {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Copy Sharing Link
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy a OneDrive sharing link to the clipboard using the shell "Copy Link" verb.
+ * Falls back to the web URL if the verb is not available.
+ */
+export async function copySharingLink(filePath: string): Promise<void> {
+  const folderPath = psEscape(path.dirname(filePath));
+  const fileName = psEscape(path.basename(filePath));
+
+  const script = `
+    $shell = New-Object -ComObject Shell.Application
+    $folder = $shell.NameSpace('${folderPath}')
+    if (-not $folder) { Write-Output 'FOLDER_NOT_FOUND'; exit 1 }
+    $item = $folder.ParseName('${fileName}')
+    if (-not $item) { Write-Output 'FILE_NOT_FOUND'; exit 1 }
+
+    $copyLinkVerb = $null
+    foreach ($v in $item.Verbs()) {
+      if ($v.Name -eq 'Copy Link') {
+        $copyLinkVerb = $v
+        break
+      }
+    }
+
+    if ($copyLinkVerb) {
+      $copyLinkVerb.DoIt()
+      Start-Sleep -Seconds 1
+      $link = Get-Clipboard
+      if ($link -and $link -match '^https://') {
+        Write-Output "LINK:$link"
+      } else {
+        Write-Output 'CLIPBOARD_EMPTY'
+      }
+    } else {
+      Write-Output 'NO_VERB'
+    }
+  `;
+
+  try {
+    const result = (await runPowerShell(script)).trim();
+
+    if (result.startsWith("LINK:")) {
+      const link = result.substring(5);
+      await vscode.env.clipboard.writeText(link);
+      vscode.window.showInformationMessage("Sharing link copied to clipboard.");
+      return;
+    }
+
+    // Fallback: use the web URL
+    const webUrl = await resolveWebUrl(filePath);
+    if (webUrl) {
+      await vscode.env.clipboard.writeText(webUrl);
+      vscode.window.showInformationMessage(
+        "Sharing link not available. Web URL copied to clipboard."
+      );
+    } else {
+      vscode.window.showWarningMessage(
+        "Could not generate a sharing link for this file."
+      );
+    }
+  } catch (err: any) {
+    vscode.window.showErrorMessage(
+      `Failed to copy sharing link: ${err.message}`
+    );
+  }
+}

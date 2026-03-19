@@ -5,7 +5,7 @@ import {
   discoverOneDriveRoots,
   findOneDriveRoot,
 } from "./onedrive";
-import { shareFile, openInOfficeApp, openOnWeb, openFolderOnWeb, openVersionHistory } from "./sharing";
+import { shareFile, openInOfficeApp, openOnWeb, openFolderOnWeb, openVersionHistory, copySharingLink } from "./sharing";
 import { OfficePreviewProvider } from "./preview";
 import { SyncStatusDecorationProvider } from "./sync-decorations";
 import { showRecentFiles } from "./recent-files";
@@ -135,6 +135,23 @@ export function activate(context: vscode.ExtensionContext): void {
       "paperclipped.recentFiles",
       async () => {
         await showRecentFiles();
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.copySharingLink",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (!filePath) {
+          return;
+        }
+        if (!isInOneDrive(filePath)) {
+          vscode.window.showWarningMessage(
+            "This file is not in a OneDrive folder."
+          );
+          return;
+        }
+        await copySharingLink(filePath);
       }
     )
   );

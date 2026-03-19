@@ -92,6 +92,11 @@
         "command": "paperclipped.recentFiles",
         "title": "Recent Files",
         "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.copySharingLink",
+        "title": "Copy Sharing Link",
+        "category": "Paperclipped"
       }
     ],
     "submenus": [
@@ -123,6 +128,10 @@
       "paperclipped.menu": [
         {
           "command": "paperclipped.share",
+          "group": "1_share"
+        },
+        {
+          "command": "paperclipped.copySharingLink",
           "group": "1_share"
         },
         {
@@ -184,6 +193,10 @@
         },
         {
           "command": "paperclipped.recentFiles",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.copySharingLink",
           "when": "paperclipped:isOneDriveWorkspace"
         }
       ]
