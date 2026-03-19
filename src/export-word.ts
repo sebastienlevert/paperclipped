@@ -14,19 +14,28 @@ async function isMarkMyWordInstalled(): Promise<boolean> {
 }
 
 /**
- * Install the MarkMyWord CLI as a .NET global tool.
+ * Install the MarkMyWord CLI as a .NET global tool via the integrated terminal.
+ * Returns true if the install command completed successfully.
  */
 async function installMarkMyWord(): Promise<boolean> {
-  return new Promise((resolve) => {
-    execFile(
-      "dotnet",
-      ["tool", "install", "-g", "specworks.markmyword.cli"],
-      { timeout: 60000 },
-      (err) => {
-        resolve(!err);
-      }
-    );
-  });
+  const terminal = vscode.window.createTerminal("Paperclipped");
+  terminal.show();
+  terminal.sendText(
+    "dotnet tool install -g specworks.markmyword.cli && echo PAPERCLIPPED_INSTALL_OK"
+  );
+
+  // Wait for the terminal to finish by polling for the CLI
+  const maxWait = 60000;
+  const interval = 2000;
+  let elapsed = 0;
+  while (elapsed < maxWait) {
+    await new Promise((r) => setTimeout(r, interval));
+    elapsed += interval;
+    if (await isMarkMyWordInstalled()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
