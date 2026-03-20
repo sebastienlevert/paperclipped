@@ -102,6 +102,11 @@
         "command": "paperclipped.exportToWord",
         "title": "Export to Word",
         "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.oneDriveMenu",
+        "title": "OneDrive Menu",
+        "category": "Paperclipped"
       }
     ],
     "submenus": [
@@ -224,6 +229,10 @@
         {
           "command": "paperclipped.exportToWord",
           "when": "resourceExtname =~ /^\\.md$/i"
+        },
+        {
+          "command": "paperclipped.oneDriveMenu",
+          "when": "false"
         }
       ]
     },
