@@ -77,6 +77,31 @@
           "light": "resources/icons/web.svg",
           "dark": "resources/icons/web.svg"
         }
+      },
+      {
+        "command": "paperclipped.openFolderOnWeb",
+        "title": "Open Folder on Web",
+        "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.versionHistory",
+        "title": "Version History",
+        "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.recentFiles",
+        "title": "Recent Files",
+        "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.copySharingLink",
+        "title": "Copy Sharing Link",
+        "category": "Paperclipped"
+      },
+      {
+        "command": "paperclipped.exportToWord",
+        "title": "Export to Word",
+        "category": "Paperclipped"
       }
     ],
     "submenus": [
@@ -91,6 +116,11 @@
           "submenu": "paperclipped.menu",
           "when": "paperclipped:isOneDriveWorkspace && !explorerResourceIsFolder",
           "group": "navigation@100"
+        },
+        {
+          "command": "paperclipped.openFolderOnWeb",
+          "when": "paperclipped:isOneDriveWorkspace && explorerResourceIsFolder",
+          "group": "navigation@100"
         }
       ],
       "editor/title/context": [
@@ -103,6 +133,10 @@
       "paperclipped.menu": [
         {
           "command": "paperclipped.share",
+          "group": "1_share"
+        },
+        {
+          "command": "paperclipped.copySharingLink",
           "group": "1_share"
         },
         {
@@ -123,6 +157,19 @@
         {
           "command": "paperclipped.openOnWeb",
           "group": "3_web"
+        },
+        {
+          "command": "paperclipped.openFolderOnWeb",
+          "group": "3_web"
+        },
+        {
+          "command": "paperclipped.versionHistory",
+          "group": "4_history"
+        },
+        {
+          "command": "paperclipped.exportToWord",
+          "when": "resourceExtname == .md",
+          "group": "5_export"
         }
       ],
       "commandPalette": [
@@ -145,6 +192,26 @@
         {
           "command": "paperclipped.openOnWeb",
           "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.openFolderOnWeb",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.versionHistory",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.recentFiles",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.copySharingLink",
+          "when": "paperclipped:isOneDriveWorkspace"
+        },
+        {
+          "command": "paperclipped.exportToWord",
+          "when": "resourceExtname =~ /^\\.md$/i"
         }
       ]
     },
