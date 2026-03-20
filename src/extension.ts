@@ -5,6 +5,7 @@ import {
   isInOneDrive,
   discoverOneDriveRoots,
   findOneDriveRoot,
+  enrichAccountsFromRegistry,
 } from "./onedrive";
 import { shareFile, openInOfficeApp, openOnWeb, openFolderOnWeb, openVersionHistory, copySharingLink } from "./sharing";
 import { OfficePreviewProvider } from "./preview";
@@ -19,6 +20,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Set initial context for menu visibility
   refreshOneDriveContext();
+
+  // Enrich accounts with web endpoints from registry (async, fire-and-forget)
+  enrichAccountsFromRegistry(discoverOneDriveRoots());
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeWorkspaceFolders(() =>
@@ -204,7 +208,7 @@ export function activate(context: vscode.ExtensionContext): void {
           }
         } else {
           const uri = vscode.Uri.file(root.localPath);
-          await vscode.commands.executeCommand("revealInExplorer", uri);
+          await vscode.env.openExternal(uri);
         }
       }
     )
