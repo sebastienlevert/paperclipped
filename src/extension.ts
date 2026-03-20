@@ -1,11 +1,17 @@
+import * as path from "path";
 import * as vscode from "vscode";
 import {
   isWorkspaceInOneDrive,
   isInOneDrive,
   discoverOneDriveRoots,
+  findOneDriveRoot,
+  enrichAccountsFromRegistry,
 } from "./onedrive";
-import { shareFile, openInOfficeApp, openOnWeb } from "./sharing";
+import { shareFile, openInOfficeApp, openOnWeb, openFolderOnWeb, openVersionHistory, copySharingLink } from "./sharing";
 import { OfficePreviewProvider } from "./preview";
+import { SyncStatusDecorationProvider } from "./sync-decorations";
+import { showRecentFiles } from "./recent-files";
+import { exportToWord } from "./export-word";
 
 export function activate(context: vscode.ExtensionContext): void {
   if (process.platform !== "win32") {
@@ -15,6 +21,9 @@ export function activate(context: vscode.ExtensionContext): void {
   // Set initial context for menu visibility
   refreshOneDriveContext();
 
+  // Enrich accounts with web endpoints from registry (async, fire-and-forget)
+  enrichAccountsFromRegistry(discoverOneDriveRoots());
+
   context.subscriptions.push(
     vscode.workspace.onDidChangeWorkspaceFolders(() =>
       refreshOneDriveContext()
@@ -23,6 +32,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // ── Custom editor ────────────────────────────────────────
   context.subscriptions.push(OfficePreviewProvider.register(context));
+
+  // ── Sync status decorations ────────────────────────────
+  SyncStatusDecorationProvider.register(context);
 
   // ── Commands ──────────────────────────────────────────────
 
@@ -89,7 +101,186 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         await openOnWeb(filePath);
       }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.openFolderOnWeb",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (!filePath) {
+          return;
+        }
+        if (!isInOneDrive(filePath)) {
+          vscode.window.showWarningMessage(
+            "This file is not in a OneDrive folder."
+          );
+          return;
+        }
+        await openFolderOnWeb(filePath);
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.versionHistory",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (!filePath) {
+          return;
+        }
+        if (!isInOneDrive(filePath)) {
+          vscode.window.showWarningMessage(
+            "This file is not in a OneDrive folder."
+          );
+          return;
+        }
+        await openVersionHistory(filePath);
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.recentFiles",
+      async () => {
+        await showRecentFiles();
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.copySharingLink",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (!filePath) {
+          return;
+        }
+        if (!isInOneDrive(filePath)) {
+          vscode.window.showWarningMessage(
+            "This file is not in a OneDrive folder."
+          );
+          return;
+        }
+        await copySharingLink(filePath);
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.exportToWord",
+      async (uri?: vscode.Uri) => {
+        const filePath = resolveFilePath(uri);
+        if (filePath) {
+          await exportToWord(filePath);
+        }
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.oneDriveMenu",
+      async () => {
+        const filePath = getActiveFilePath();
+        const root = filePath
+          ? findOneDriveRoot(filePath)
+          : discoverOneDriveRoots()[0];
+        if (!root) {
+          return;
+        }
+
+        const items: vscode.QuickPickItem[] = [
+          { label: "$(folder) Open OneDrive Folder", description: root.localPath },
+          { label: "$(globe) Open OneDrive Folder on the Web", description: "Open in browser" },
+        ];
+
+        const pick = await vscode.window.showQuickPick(items, {
+          placeHolder: path.basename(root.localPath),
+        });
+
+        if (!pick) {
+          return;
+        }
+
+        if (pick.label.includes("on the Web")) {
+          if (root.webEndpoint) {
+            // Open the root Documents folder on the web
+            await vscode.env.openExternal(
+              vscode.Uri.parse(root.webEndpoint + "Documents")
+            );
+          } else {
+            vscode.window.showWarningMessage(
+              "Could not determine the web URL for this OneDrive."
+            );
+          }
+        } else {
+          const uri = vscode.Uri.file(root.localPath);
+          await vscode.env.openExternal(uri);
+        }
+      }
     )
+  );
+
+  // ── Status bar ────────────────────────────────────────────
+  const statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    50
+  );
+  statusBarItem.command = "paperclipped.oneDriveMenu";
+  context.subscriptions.push(statusBarItem);
+
+  const updateStatusBar = () => {
+    const filePath = getActiveFilePath();
+    if (filePath && isInOneDrive(filePath)) {
+      const root = findOneDriveRoot(filePath);
+      const label = root ? path.basename(root.localPath) : "OneDrive";
+      statusBarItem.text = `$(cloud) ${label}`;
+      statusBarItem.tooltip = root
+        ? `Paperclipped — ${root.localPath}`
+        : "Paperclipped — OneDrive";
+      statusBarItem.show();
+    } else {
+      statusBarItem.hide();
+    }
+  };
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(() => updateStatusBar()),
+    vscode.window.tabGroups.onDidChangeTabs(() => updateStatusBar())
+  );
+  updateStatusBar();
+
+  // Quick actions command (triggered by clicking the status bar)
+  context.subscriptions.push(
+    vscode.commands.registerCommand("paperclipped.quickActions", async () => {
+      const filePath = getActiveFilePath();
+      if (!filePath || !isInOneDrive(filePath)) {
+        return;
+      }
+
+      const items: vscode.QuickPickItem[] = [
+        { label: "$(globe) Open on Web", description: "Open file in browser" },
+        { label: "$(folder) Open Folder on Web", description: "Open parent folder in browser" },
+        { label: "$(share) Share", description: "Open sharing dialog" },
+        { label: "$(history) Version History", description: "View version history" },
+        { label: "$(clock) Recent Files", description: "Browse recent OneDrive files" },
+      ];
+
+      const pick = await vscode.window.showQuickPick(items, {
+        placeHolder: "Paperclipped — choose an action",
+      });
+
+      if (!pick) {
+        return;
+      }
+
+      const uri = vscode.Uri.file(filePath);
+      const commandMap: Record<string, string> = {
+        "$(globe) Open on Web": "paperclipped.openOnWeb",
+        "$(folder) Open Folder on Web": "paperclipped.openFolderOnWeb",
+        "$(share) Share": "paperclipped.share",
+        "$(history) Version History": "paperclipped.versionHistory",
+        "$(clock) Recent Files": "paperclipped.recentFiles",
+      };
+
+      const cmd = commandMap[pick.label];
+      if (cmd) {
+        vscode.commands.executeCommand(cmd, uri);
+      }
+    })
   );
 
   // ── Startup log ──────────────────────────────────────────
@@ -146,6 +337,25 @@ function resolveFilePath(uri?: vscode.Uri): string | undefined {
   }
 
   vscode.window.showWarningMessage("No file selected.");
+  return undefined;
+}
+
+/** Get the active file path without showing warnings — used for status bar updates. */
+function getActiveFilePath(): string | undefined {
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    return editor.document.uri.fsPath;
+  }
+  const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+  if (activeTab?.input) {
+    const input = activeTab.input as any;
+    if (input.uri?.fsPath) {
+      return input.uri.fsPath;
+    }
+    if (input.modified?.fsPath) {
+      return input.modified.fsPath;
+    }
+  }
   return undefined;
 }
 
