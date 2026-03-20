@@ -263,34 +263,20 @@ export async function openVersionHistory(filePath: string): Promise<void> {
   const folderPath = psEscape(path.dirname(filePath));
   const fileName = psEscape(path.basename(filePath));
 
-  const script = `
-    $shell = New-Object -ComObject Shell.Application
-    $folder = $shell.NameSpace('${folderPath}')
-    if (-not $folder) { Write-Output 'FOLDER_NOT_FOUND'; exit 1 }
-    $item = $folder.ParseName('${fileName}')
-    if (-not $item) { Write-Output 'FILE_NOT_FOUND'; exit 1 }
-
-    $historyVerb = $null
-    foreach ($v in $item.Verbs()) {
-      if ($v.Name -match '[Vv]ersion\s*[Hh]istory') {
-        $historyVerb = $v
-        break
-      }
-    }
-
-    if ($historyVerb) {
-      $historyVerb.DoIt()
-      Write-Output 'OK'
-    } else {
-      Write-Output 'NO_VERB'
-    }
-  `;
+  // Build an inline script that invokes the COM verb.
+  // Must run in a separate interactive process so the UI dialog can render
+  // (runPowerShell uses -NonInteractive which suppresses dialogs).
+  const inlineScript = `$shell = New-Object -ComObject Shell.Application; $folder = $shell.NameSpace('${folderPath}'); if (-not $folder) { exit 1 } $item = $folder.ParseName('${fileName}'); if (-not $item) { exit 1 } $v = $item.Verbs() | Where-Object { $_.Name -match 'ersion.*istory' } | Select-Object -First 1; if ($v) { $v.DoIt(); Start-Sleep -Seconds 2 } else { exit 1 }`;
 
   try {
-    const result = (await runPowerShell(script)).trim();
-    if (result === "OK") {
-      return;
-    }
+    const { spawn } = require("child_process") as typeof import("child_process");
+    const child = spawn(
+      "powershell.exe",
+      ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", inlineScript],
+      { detached: true, stdio: "ignore" }
+    );
+    child.unref();
+    return;
   } catch {
     // Fall through to web fallback
   }
