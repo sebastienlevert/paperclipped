@@ -164,6 +164,27 @@ export function activate(context: vscode.ExtensionContext): void {
           await exportToWord(filePath);
         }
       }
+    ),
+
+    vscode.commands.registerCommand(
+      "paperclipped.openOneDriveRoot",
+      async () => {
+        const filePath = getActiveFilePath();
+        if (filePath) {
+          const root = findOneDriveRoot(filePath);
+          if (root) {
+            const uri = vscode.Uri.file(root.localPath);
+            await vscode.commands.executeCommand("revealInExplorer", uri);
+            return;
+          }
+        }
+        // Fallback: open first discovered root
+        const roots = discoverOneDriveRoots();
+        if (roots.length > 0) {
+          const uri = vscode.Uri.file(roots[0].localPath);
+          await vscode.commands.executeCommand("revealInExplorer", uri);
+        }
+      }
     )
   );
 
@@ -172,24 +193,17 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.StatusBarAlignment.Right,
     50
   );
-  statusBarItem.command = "paperclipped.quickActions";
+  statusBarItem.command = "paperclipped.openOneDriveRoot";
   context.subscriptions.push(statusBarItem);
 
   const updateStatusBar = () => {
     const filePath = getActiveFilePath();
     if (filePath && isInOneDrive(filePath)) {
       const root = findOneDriveRoot(filePath);
-      const label = root?.accountName ?? "OneDrive";
-      const type =
-        root?.accountType === "business"
-          ? "Work or School"
-          : root?.accountType === "personal"
-            ? "Personal"
-            : "";
-      statusBarItem.text = `$(cloud) ${label}`;
-      statusBarItem.tooltip = type
-        ? `Paperclipped — ${label} (${type})`
-        : `Paperclipped — ${label}`;
+      statusBarItem.text = "$(cloud) OneDrive";
+      statusBarItem.tooltip = root
+        ? `Paperclipped — ${root.localPath}`
+        : "Paperclipped — OneDrive";
       statusBarItem.show();
     } else {
       statusBarItem.hide();
